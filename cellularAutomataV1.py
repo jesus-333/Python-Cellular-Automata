@@ -54,9 +54,13 @@ class cellularAutomataV1():
         
         
         n_cells_neighbor += self.checkUp(i, j)
+        n_cells_neighbor += self.checkUpRight(i, j)
         n_cells_neighbor += self.checkRight(i, j)
+        n_cells_neighbor += self.checkDownRight(i, j)
         n_cells_neighbor += self.checkDown(i, j)
+        n_cells_neighbor += self.checkDownLeft(i, j)
         n_cells_neighbor += self.checkLeft(i, j)
+        n_cells_neighbor += self.checkUpLeft(i, j)
         
         if(self.cells[i, j] == 0): # If the cell is dead
             if(n_cells_neighbor == self.cells_to_live): return_value = 1
@@ -80,77 +84,24 @@ class cellularAutomataV1():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Check functions (CROSS)
     
-    def checkUp(self, i, j):
-        if(i == 0): 
-            tmp_cell = self.cells[self.height - 1, j]
-        else: 
-            tmp_cell = self.cells[i - 1, j]
-        
-        if(tmp_cell > 0): return 1
-        else: return 0
-        
-    def checkDown(self, i, j):
-        if(i == (self.height - 1)): 
-            tmp_cell = self.cells[0, j]
-        else: 
-            tmp_cell = self.cells[i + 1, j]
-        
-        if(tmp_cell > 0): return 1
-        else: return 0
-        
-    def checkLeft(self, i, j):
-        if(j == 0): 
-            tmp_cell = self.cells[i, self.width - 1]
-        else: 
-            tmp_cell = self.cells[i, j - 1]
-        
-        if(tmp_cell > 0): return 1
-        else: return 0
-        
-    def checkRight(self, i, j):
-        if(j == (self.width - 1)): 
-            tmp_cell = self.cells[i, 0]
-        else: 
-            tmp_cell = self.cells[i, j + 1]
-        
-        if(tmp_cell > 0): return 1
-        else: return 0
+    def checkUp(self, i, j):    return 1 if(self.cells[self.moveUp(i), j] > 0) else 0  
+    def checkDown(self, i, j):  return 1 if(self.cells[self.moveDown(i), j] > 0) else 0
+    def checkLeft(self, i, j):  return 1 if(self.cells[i, self.moveLeft(j)] > 0) else 0
+    def checkRight(self, i, j): return 1 if(self.cells[i, self.moveRight(j)] > 0) else 0
         
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Check functions (DIAGONAL)
     
-    def checkUp(self, i, j):
-        if(i == 0): 
-            tmp_cell = self.cells[self.height - 1, j]
-        else: 
-            tmp_cell = self.cells[i - 1, j]
+    def checkUpLeft(self, i, j):    return 1 if(self.cells[self.moveUp(i), self.moveLeft(j)] > 0) else 0   
+    def checkUpRight(self, i, j):   return 1 if(self.cells[self.moveDown(i), self.moveRight(j)] > 0) else 0  
+    def checkDownLeft(self, i, j):  return 1 if(self.cells[self.moveDown(i), self.moveLeft(j)] > 0) else 0 
+    def checkDownRight(self, i, j): return 1 if(self.cells[self.moveDown(i), self.moveRight(j)] > 0) else 0
+    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # Move functions
+    
+    def moveUp(self, i):    return self.height - 1 if i == 0 else i - 1
+    def moveDown(self, i):  return 0 if i == self.height - 1 else i + 1
+    def moveRight(self, j): return self.width - 1 if j == 0 else j - 1
+    def moveLeft(self, j):  return 0 if j == self.width - 1 else j + 1
         
-        if(tmp_cell > 0): return 1
-        else: return 0
-        
-    def checkDown(self, i, j):
-        if(i == (self.height - 1)): 
-            tmp_cell = self.cells[0, j]
-        else: 
-            tmp_cell = self.cells[i + 1, j]
-        
-        if(tmp_cell > 0): return 1
-        else: return 0
-        
-    def checkLeft(self, i, j):
-        if(j == 0): 
-            tmp_cell = self.cells[i, self.width - 1]
-        else: 
-            tmp_cell = self.cells[i, j - 1]
-        
-        if(tmp_cell > 0): return 1
-        else: return 0
-        
-    def checkRight(self, i, j):
-        if(j == (self.width - 1)): 
-            tmp_cell = self.cells[i, 0]
-        else: 
-            tmp_cell = self.cells[i, j + 1]
-        
-        if(tmp_cell > 0): return 1
-        else: return 0
