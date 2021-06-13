@@ -8,9 +8,9 @@ Created on Sun Jun 13 21:49:12 2021
 
 import numpy as np
 
-#%%
+#%% Conway's Game of Life
 
-class cellularAutomataV1():
+class GameOfLife():
     
     def __init__(self, width, height, cells_to_live = 3, cells_die_alone = 2, cells_overpopulation = 4):
         self.width = width
@@ -34,7 +34,9 @@ class cellularAutomataV1():
         self.cells[tmp_random > p] = 1
         self.ghost_cells[tmp_random > p] = 1
         
-        self.ch_matrix = np.random.randint(0, 3, (self.height, self.width))
+        self.setChMatrixRandom()
+        
+    def setChMatrixRandom(self): self.ch_matrix = np.random.randint(0, 3, (self.height, self.width))
         
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Update functions
@@ -108,3 +110,88 @@ class cellularAutomataV1():
     def moveRight(self, j): return self.width - 1 if j == 0 else j - 1
     def moveLeft(self, j):  return 0 if j == self.width - 1 else j + 1
         
+
+#%% Langton's ant
+
+class LangtonAnts():
+    
+    def __init__(self, width, height, n_ants = 1):
+        # Dimensions of the grid
+        self.width = width
+        self.height = height
+        
+        # Grid variables
+        self.cells = np.zeros((height, width))
+        self.ghost_cells = np.zeros((height, width))
+        self.draw_cells = np.zeros((height, width, 3))
+        
+        # List of the ants
+        self.list_of_ants = []
+        
+        # Values for the direction
+        self.UP = 0
+        self.RIGHT = 1
+        self.DOWN = 2
+        self.LEFT = 3
+        
+        # Random inizialization
+        for i in range(n_ants):
+            tmp_position = [np.random.randint(0, height, 1)[0], np.random.randint(0, width, 1)[0]]
+            tmp_color = (np.random.random(1)[0], np.random.random(1)[0], np.random.random(1)[0])
+            tmp_direction = np.random.randint(0, 4, 1)[0]
+            
+            tmp_ant = {'position':tmp_position, 'color':tmp_color, 'direction':tmp_direction}
+            self.list_of_ants.append(tmp_ant)
+        
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # Update functions
+        
+    def update(self):
+        for ant in self.list_of_ants: 
+            # Rotate the ant and change the color
+            ant['direction'] = self.rotateAnt(ant)
+            
+            # Move the ant
+            ant['position'] = self.moveAnt(ant)
+        
+        # Update all the states together
+        np.copyto(self.cells, self.ghost_cells)
+            
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # Rotate functions
+            
+    def rotateAnt(self, ant):
+        # Retrieve ant position and the state of the corresponding cell
+        i, j = ant['position']       
+        cell_state = self.cells[i, j]
+        
+        if(cell_state == 0): # Black cell
+            self.ghost_cells[i, j] = 1
+            self.draw_cells[i, j] = np.asarray(ant['color'])
+            return self.rotateClockwise(ant['direction'])
+        else: # Colored cell
+            self.ghost_cells[i, j] = 0
+            self.draw_cells[i, j] = np.asarray([0, 0, 0])
+            return self.rotateAnticlockwise(ant['direction'])
+        
+    
+    def rotateClockwise(self, direction): return self.UP if direction >= self.LEFT else direction + 1
+    def rotateAnticlockwise(self, direction): return self.LEFT if direction <= self.UP else direction - 1
+    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # Rotate functions
+    
+    def moveAnt(self, ant):
+        i, j = ant['position']
+        direction = ant['direction']
+        
+        if(direction == self.UP):   return [self.moveUp(i),     j]
+        if(direction == self.RIGHT): return [i,                  self.moveRight(j)]
+        if(direction == self.DOWN): return [self.moveDown(i),   j]
+        if(direction == self.LEFT): return [i,                  self.moveLeft(j)]
+            
+        
+    def moveUp(self, i):    return self.height - 1 if i == 0 else i - 1
+    def moveDown(self, i):  return 0 if i == self.height - 1 else i + 1
+    def moveRight(self, j): return self.width - 1 if j == 0 else j - 1
+    def moveLeft(self, j):  return 0 if j == self.width - 1 else j + 1
