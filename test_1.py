@@ -5,15 +5,15 @@ from cellularAutomataV1 import cellularAutomataV1
 
 #%%
 
-width = 400
-height = 200
+width = 200
+height = 100
 
 
 ca_grid = cellularAutomataV1(width, height)
 ca_grid.randomSeed(0.7)
 
 cv2.namedWindow("Cells", cv2.WINDOW_NORMAL)
-cv2.resizeWindow('Cells', 1000, 500)
+cv2.resizeWindow('Cells', 800, 400)
 
 
 while(True):

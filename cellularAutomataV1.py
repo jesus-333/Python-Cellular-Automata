@@ -16,8 +16,8 @@ class cellularAutomataV1():
         self.width = width
         self.height = height
         
-        self.cells = np.zeros((height, width))
-        self.ghost_cells = np.zeros((height, width))
+        self.cells = np.zeros((height, width, 3))
+        self.ghost_cells = np.zeros((height, width, 3))
         
         self.cells_to_live = 3
         self.cells_die_alone = 2
@@ -34,6 +34,8 @@ class cellularAutomataV1():
         self.cells[tmp_random > p] = 1
         self.ghost_cells[tmp_random > p] = 1
         
+        self.ch_matrix = np.random.randint(0, 3, (self.height, self.width))
+        
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Update functions
         
@@ -43,15 +45,16 @@ class cellularAutomataV1():
                 tmp_value = self.updateCell(i, j)
                 
                 if(tmp_value == 0): self.ghost_cells[i, j] = 0
-                else: self.ghost_cells[i, j] += 1
-                
+                else: 
+                    self.ghost_cells[i, j, self.ch_matrix[i, j]] += 1
+                    if(self.ghost_cells[i, j, self.ch_matrix[i, j]] > 255): self.ghost_cells[i, j, self.ch_matrix[i, j]] = 1
+                     
         np.copyto(self.cells, self.ghost_cells)
                 
     
     def updateCell(self, i, j):
         n_cells_neighbor = 0
         return_value = -1
-        
         
         n_cells_neighbor += self.checkUp(i, j)
         n_cells_neighbor += self.checkUpRight(i, j)
@@ -62,12 +65,12 @@ class cellularAutomataV1():
         n_cells_neighbor += self.checkLeft(i, j)
         n_cells_neighbor += self.checkUpLeft(i, j)
         
-        if(self.cells[i, j] == 0): # If the cell is dead
+        if(self.cells[i, j, self.ch_matrix[i, j]] == 0): # If the cell is dead
             if(n_cells_neighbor == self.cells_to_live): return_value = 1
             else: return_value = 0
             
             return return_value;
-        elif(self.cells[i, j] > 0): # If the cell is alive
+        elif(self.cells[i, j, self.ch_matrix[i, j]] > 0): # If the cell is alive
             
             # Cell die for loneliness
             if(n_cells_neighbor < self.cells_die_alone): return_value = 0
@@ -84,18 +87,18 @@ class cellularAutomataV1():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Check functions (CROSS)
     
-    def checkUp(self, i, j):    return 1 if(self.cells[self.moveUp(i), j] > 0) else 0  
-    def checkDown(self, i, j):  return 1 if(self.cells[self.moveDown(i), j] > 0) else 0
-    def checkLeft(self, i, j):  return 1 if(self.cells[i, self.moveLeft(j)] > 0) else 0
-    def checkRight(self, i, j): return 1 if(self.cells[i, self.moveRight(j)] > 0) else 0
+    def checkUp(self, i, j):    return 1 if(self.cells[self.moveUp(i),      j,                  self.ch_matrix[self.moveUp(i), j]] > 0)     else 0  
+    def checkDown(self, i, j):  return 1 if(self.cells[self.moveDown(i),    j,                  self.ch_matrix[self.moveDown(i), j]] > 0)   else 0
+    def checkLeft(self, i, j):  return 1 if(self.cells[i,                   self.moveLeft(j),   self.ch_matrix[i, self.moveLeft(j)]] > 0)   else 0
+    def checkRight(self, i, j): return 1 if(self.cells[i,                   self.moveRight(j),  self.ch_matrix[i, self.moveRight(j)]] > 0)  else 0
         
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Check functions (DIAGONAL)
     
-    def checkUpLeft(self, i, j):    return 1 if(self.cells[self.moveUp(i), self.moveLeft(j)] > 0) else 0   
-    def checkUpRight(self, i, j):   return 1 if(self.cells[self.moveDown(i), self.moveRight(j)] > 0) else 0  
-    def checkDownLeft(self, i, j):  return 1 if(self.cells[self.moveDown(i), self.moveLeft(j)] > 0) else 0 
-    def checkDownRight(self, i, j): return 1 if(self.cells[self.moveDown(i), self.moveRight(j)] > 0) else 0
+    def checkUpLeft(self, i, j):    return 1 if(self.cells[self.moveUp(i),   self.moveLeft(j),  self.ch_matrix[self.moveUp(i),   self.moveLeft(j)]] > 0)  else 0   
+    def checkUpRight(self, i, j):   return 1 if(self.cells[self.moveDown(i), self.moveRight(j), self.ch_matrix[self.moveDown(i), self.moveRight(j)]] > 0) else 0  
+    def checkDownLeft(self, i, j):  return 1 if(self.cells[self.moveDown(i), self.moveLeft(j),  self.ch_matrix[self.moveDown(i), self.moveLeft(j)]] > 0)  else 0 
+    def checkDownRight(self, i, j): return 1 if(self.cells[self.moveDown(i), self.moveRight(j), self.ch_matrix[self.moveDown(i), self.moveRight(j)]] > 0) else 0
     
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Move functions
