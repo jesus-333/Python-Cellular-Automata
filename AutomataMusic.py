@@ -27,8 +27,108 @@ def rescale(x, a = 0, b = 1):
 
 class AntsMusic():
     
-    def __init__(self, width, length):
-        a = 1;
+    def __init__(self, width, height, sound_duration = 1, fs = 44100):
+        self.height, self.width = width, height
+        
+        # Read the frequency list
+        self.freq_list = readFrequnecyFromFile();
+        
+        # Find the minimum and maximum exponent
+        self.min_exp_list = self.min_exp()
+        self.max_exp_list = self.max_exp()
+        
+        # Sound map creation
+        self.sound_map = self.createSoundMap()
+        
+    def min_exp(self):
+        """
+        Evaluate the minimum exponenent needed to obtain a frequency equal or lower to the minumum frequency in the frequency list
+        For my list the minimum frequency is 16.35Hz (C0).
+        
+        The exponent is considered as the n in the formula new_f = f * 2 ** (n/12) where f is the current frequency analyzed
+
+        """
+        
+        min_exp_list = []
+        
+        # Find the minimum frequency of the list (16.35Hz, C0)
+        min_abs_freq = np.min(self.freq_list)
+        
+        for freq in self.freq_list:
+            n = 0
+            while(True):
+                tmp_freq = freq * 2 ** (n / 12)
+                
+                # If the new frequency is lower than the absolute minimum save the n and stop the inner cycle. Otherwise reduce n
+                if(tmp_freq < min_abs_freq): 
+                    self.min_exp_list.append(n)
+                    break
+                else:
+                    n -= 1
+                    
+        return min_exp_list
+    
+    def max_exp(self):
+        """
+        Same as min_exp but for the max frequenc
+        """
+        
+        max_exp_list = []
+        max_abs_freq = np.max(self.freq_list)
+        
+        for freq in self.freq_list:
+            n = 0
+            while(True):
+                tmp_freq = freq * 2 ** (n / 12)
+                
+                if(tmp_freq < max_abs_freq): 
+                    self.max_exp_list.append(n)
+                    break
+                else:
+                    n += 1
+                    
+        return max_exp_list
+                
+    def createSoundMap(self, sound_duration = 1, fs = 44100):
+        """
+        Create a matrix with the same size of the Langton Ants Cellular Automata Grid.
+        At each element of the grid corresponding a sine wave.
+
+        Returns
+        -------
+        None.
+
+        """
+        
+        # Matrix creation
+        sound_map = np.zeros(self.height, self.width, fs * sound_duration)
+        idx_freq = 0
+        
+        for i in range(self.height):
+            current_freq = self.freq_list[idx_freq]
+            min_exp_current_freq = self.min_exp_list[idx_freq]
+            max_exp_current_freq = self.max_exp_list[idx_freq]
+            n = 0
+            
+            for j in range(self.width):
+                # Exponent check. If it is bigger than max set it to min
+                if(n >= max_exp_current_freq): n = min_exp_current_freq
+                
+                # Evaluate frequency for the current cell
+                tmp_freq = current_freq * 2 ** (n / 12)
+                
+                # Advance frequency exponent
+                n += 1
+                
+                # Create sine wave and save it into the cell
+                sound_map[i, j] = (np.sin(2 * np.pi * np.arange(fs * duration) * tmp_freq /fs)).astype(np.float32)
+                    
+
+            # Advance the frequency index
+            if(idx_freq >= len(self.freq_listfre)): idx_freq = 0 
+            else: idx_freq += 1
+            
+        return sound_map
 
 
 
