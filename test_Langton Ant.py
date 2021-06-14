@@ -5,15 +5,20 @@ from cellularAutomataV1 import LangtonAnts
 
 #%%
 
-width = 200
-height = 100
+width = 400
+height = 200
 
-n_ants = 6
+n_ants = 5
+
+n_step = 100
+# n_step = 0
 
 ca_grid = LangtonAnts(width, height, n_ants = n_ants)
 
 cv2.namedWindow("Cells", cv2.WINDOW_NORMAL)
 cv2.resizeWindow('Cells', 800, 400)
+
+ca_grid.computeNStep(n_step)
 
 
 while(True):

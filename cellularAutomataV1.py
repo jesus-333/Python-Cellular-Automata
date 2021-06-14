@@ -115,7 +115,7 @@ class GameOfLife():
 
 class LangtonAnts():
     
-    def __init__(self, width, height, n_ants = 1):
+    def __init__(self, width, height, n_ants = 1, reproduction = True):
         # Dimensions of the grid
         self.width = width
         self.height = height
@@ -136,12 +136,22 @@ class LangtonAnts():
         
         # Random inizialization
         for i in range(n_ants):
-            tmp_position = [np.random.randint(0, height, 1)[0], np.random.randint(0, width, 1)[0]]
-            tmp_color = (np.random.random(1)[0], np.random.random(1)[0], np.random.random(1)[0])
-            tmp_direction = np.random.randint(0, 4, 1)[0]
+            self.list_of_ants.append(self.createAnt(i))
+        
+        # Reproduction value
+        self.reproduction = reproduction
+        self.reproduction_max_distance = 10
             
-            tmp_ant = {'position':tmp_position, 'color':tmp_color, 'direction':tmp_direction}
-            self.list_of_ants.append(tmp_ant)
+    def createAnt(self, i, x = -1, y = -1):
+        if(x != -1 and y != -1): tmp_position = [y, x]
+        else: tmp_position = [np.random.randint(0, self.height, 1)[0], np.random.randint(0, self.width, 1)[0]]
+        tmp_color = (np.random.random(1)[0], np.random.random(1)[0], np.random.random(1)[0])
+        tmp_direction = np.random.randint(0, 4, 1)[0]
+        
+        tmp_ant = {'id':i, 'position':tmp_position, 'color':tmp_color, 'direction':tmp_direction}
+        print(i)
+        
+        return tmp_ant
         
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Update functions
@@ -153,9 +163,15 @@ class LangtonAnts():
             
             # Move the ant
             ant['position'] = self.moveAnt(ant)
+            
+            if(self.reproduction): self.reproduceAnts()
         
         # Update all the states together
         np.copyto(self.cells, self.ghost_cells)
+        
+        
+    def computeNStep(self, n): 
+        for i in range(n): self.update()
             
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Rotate functions
@@ -179,7 +195,7 @@ class LangtonAnts():
     def rotateAnticlockwise(self, direction): return self.LEFT if direction <= self.UP else direction - 1
     
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    # Rotate functions
+    # Movement functions
     
     def moveAnt(self, ant):
         i, j = ant['position']
@@ -195,3 +211,31 @@ class LangtonAnts():
     def moveDown(self, i):  return 0 if i == self.height - 1 else i + 1
     def moveRight(self, j): return self.width - 1 if j == 0 else j - 1
     def moveLeft(self, j):  return 0 if j == self.width - 1 else j + 1
+    
+    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # Reproduction function
+    def reproduceAnts(self):
+        list_new_ants = []
+        
+        # Cycle thorugh the ants
+        for ant in self.list_of_ants:
+            for other_ant in self.list_of_ants:
+                
+                # Check to not select the same ant
+                if(ant['id'] != other_ant['id']):
+                    
+                    # Evaluate distane between two ants
+                    y1, x1 = ant['position']
+                    y2, x2 = other_ant['position']
+                    tmp_distance = np.sqrt((x1 - x2)**2 + (y1 - y1)**2)
+                    
+                    # If they are close enough a new ant born
+                    if(tmp_distance < self.reproduction_max_distance):
+                        # tmp_ant = self.createAnt(len(self.list_of_ants) + len(list_new_ants), int((x1 + x2)/2), int((y1 + y2)/2))
+                        tmp_ant = self.createAnt(len(self.list_of_ants) + len(list_new_ants))
+                        list_new_ants.append(tmp_ant)
+         
+        # Add the new ant to list
+        for new_ant in list_new_ants: self.list_of_ants.append(new_ant)
+    
