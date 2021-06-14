@@ -6,18 +6,18 @@ from AutomataMusic import AntsMusic
 
 #%%
 
-width = 108
-height = 108
+width = 400
+height = 200
 
-n_ants = 2
+n_ants = 16
 
-# n_step = 300000
+# n_step = 30000
 n_step = 0
 
 reproduction = False
 
 fs = 44100
-sound_duration = 0.5
+sound_duration = 1
 
 ca_grid = LangtonAnts(width, height, n_ants = n_ants, reproduction = reproduction)
 ca_sound = AntsMusic(width, height, fs = fs, sound_duration = sound_duration)
@@ -33,7 +33,7 @@ while(True):
     
     ca_grid.update()
     
-    ca_sound.sound(ca_grid.list_of_ants)
+    sine_wave = ca_sound.sound(ca_grid.list_of_ants)
     
     if cv2.waitKey(1) == ord('q'):
         break
