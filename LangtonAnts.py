@@ -1,14 +1,9 @@
-"""
-Created on Sun Jun 13 21:49:12 2021
-
-@author: jesus
-"""
-
-#%%
+#%% Imports
 
 import numpy as np
 
-#%% Conway's Game of Life
+#%%
+
 
 class GameOfLife():
     
@@ -115,7 +110,7 @@ class GameOfLife():
 
 class LangtonAnts():
     
-    def __init__(self, width, height, n_ants = 1, reproduction = True):
+    def __init__(self, width, height, n_ants = 1, reproduction = False):
         # Dimensions of the grid
         self.width = width
         self.height = height
@@ -164,7 +159,7 @@ class LangtonAnts():
             # Move the ant
             ant['position'] = self.moveAnt(ant)
             
-            if(self.reproduction): self.reproduceAnts()
+            if(self.reproduction and len(self.list_of_ants) < 400): self.reproduceAnts()
         
         # Update all the states together
         np.copyto(self.cells, self.ghost_cells)
@@ -215,6 +210,8 @@ class LangtonAnts():
     
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Reproduction function
+    # TODO correct bug
+    
     def reproduceAnts(self):
         list_new_ants = []
         

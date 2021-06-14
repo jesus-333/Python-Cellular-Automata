@@ -1,19 +1,21 @@
 import cv2 as cv2
 import numpy as np
 
-from cellularAutomataV1 import LangtonAnts
+from LangtonAnts import LangtonAnts
 
 #%%
 
-width = 400
-height = 200
+width = 800
+height = 400
 
 n_ants = 5
 
-n_step = 100
+n_step = 300000
 # n_step = 0
 
-ca_grid = LangtonAnts(width, height, n_ants = n_ants)
+reproduction = False
+
+ca_grid = LangtonAnts(width, height, n_ants = n_ants, reproduction = reproduction)
 
 cv2.namedWindow("Cells", cv2.WINDOW_NORMAL)
 cv2.resizeWindow('Cells', 800, 400)
