@@ -27,7 +27,7 @@ def rescale(x, a = 0, b = 1):
 
 class AntsMusic():
     
-    def __init__(self, width, height, sound_duration = 1, fs = 44100):
+    def __init__(self, width, height, sound_duration = 1, fs = 44100, channels = 1):
         self.height, self.width = width, height
         
         # Read the frequency list
@@ -38,7 +38,11 @@ class AntsMusic():
         self.max_exp_list = self.max_exp()
         
         # Sound map creation
-        self.sound_map = self.createSoundMap()
+        self.sound_map = self.createSoundMap(sound_duration = sound_duration, fs = fs)
+        
+        # 
+        self.p = pyaudio.PyAudio()
+        self.stream = p.open(format = pyaudio.paFloat32, channels = channels, rate = fs, output = True)
         
     def min_exp(self):
         """
@@ -60,8 +64,8 @@ class AntsMusic():
                 tmp_freq = freq * 2 ** (n / 12)
                 
                 # If the new frequency is lower than the absolute minimum save the n and stop the inner cycle. Otherwise reduce n
-                if(tmp_freq < min_abs_freq): 
-                    self.min_exp_list.append(n)
+                if(tmp_freq <= min_abs_freq): 
+                    min_exp_list.append(n)
                     break
                 else:
                     n -= 1
@@ -81,8 +85,10 @@ class AntsMusic():
             while(True):
                 tmp_freq = freq * 2 ** (n / 12)
                 
-                if(tmp_freq < max_abs_freq): 
-                    self.max_exp_list.append(n)
+                # print("freq = {} - max_abs_freq = {} - n = {}".format(freq, max_abs_freq, n))
+                
+                if(tmp_freq >= max_abs_freq): 
+                    max_exp_list.append(n)
                     break
                 else:
                     n += 1
@@ -101,7 +107,7 @@ class AntsMusic():
         """
         
         # Matrix creation
-        sound_map = np.zeros(self.height, self.width, fs * sound_duration)
+        sound_map = np.zeros((self.height, self.width))
         idx_freq = 0
         
         for i in range(self.height):
@@ -120,22 +126,40 @@ class AntsMusic():
                 # Advance frequency exponent
                 n += 1
                 
-                # Create sine wave and save it into the cell
-                sound_map[i, j] = (np.sin(2 * np.pi * np.arange(fs * duration) * tmp_freq /fs)).astype(np.float32)
+                # Save frequency into the cell
+                sound_map[i, j] = tmp_freq
+                
+                # Notes that even with a matrix 800 x 400 you need to much space to save the already precomputed sinewave
                     
 
             # Advance the frequency index
-            if(idx_freq >= len(self.freq_listfre)): idx_freq = 0 
-            else: idx_freq += 1
+            idx_freq += 1
+            
+            # Check the frequency index
+            if(idx_freq >= len(self.freq_list)): idx_freq = 0 
             
         return sound_map
+    
+    
+    def sound(self, list_of_ants):
+        sine_wave = np.zeros(fs * duration)
+        for ant in list_of_ants:
+            i, j = ant['position']
+            
+            sine_wave += (np.sin(2*np.pi*np.arange(fs*duration)* self.sound_map[i, j]/fs)).astype(np.float32)
+        
+        # Rescale in 0-1 range
+        sine_wave = rescale(sine_wave)
+        
+        # Reproduce sound
+        stream.write(sine_wave)
 
 
 
 #%%
 import math        #import needed modules
 import pyaudio     #sudo apt-get install python-pyaudioPyAudio = pyaudio.PyAudio     #initialize pyaudio
-p = pyaudio.PyAudio()
+
 
 volume = 0.5     # range [0.0, 1.0]
 fs = 8000       # sampling rate, Hz, must be integer
@@ -157,6 +181,8 @@ plt.plot(samples)
 plt.xlim([0, 200])
 
 samples = samples_2
+
+p = pyaudio.PyAudio()
 
 # for paFloat32 sample values must be in range [-1.0, 1.0]
 stream = p.open(format=pyaudio.paFloat32,
