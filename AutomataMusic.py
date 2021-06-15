@@ -10,7 +10,7 @@ def readFrequnecyFromFile():
     freq_list = []
     
     # Read the files and return the element as a list of string
-    with open('notes_frequency_2.txt') as f:
+    with open('notes_frequency.txt') as f:
         tmp_data = f.readlines()
         
     # Convert the list of string in a list of float
@@ -178,6 +178,7 @@ class AntsMusicV2():
         self.stream = self.p.open(format = pyaudio.paFloat32, channels = 2, rate = self.fs, output = True)
         
         
+        
     def findExponent(self, ref_freq):
         min_freq = np.min(self.freq_list)
         max_freq = np.max(self.freq_list)
@@ -239,14 +240,17 @@ class AntsMusicV2():
         for ant in list_of_ants:
             i, j = ant['position']
             
-            sine_wave += (np.sin(2*np.pi*np.arange(self.fs * self.sound_duration)* self.sound_map[i, j]/self.fs)).astype(np.float32)
+            tmp_sine_wave = (np.sin(2*np.pi*np.arange(self.fs * self.sound_duration) * self.sound_map[i, j]/self.fs)).astype(np.float32)
+            
+            sine_wave += tmp_sine_wave / len(list_of_ants)
         
         # Rescale in 0-1 range
-        sine_wave = rescale(sine_wave)
+        # sine_wave = rescale(sine_wave)
         
         # Reproduce sound
+        self.stream.start_stream()
         self.stream.write(sine_wave)
-        # stream.stop_stream()
+        self.stream.stop_stream()
         # stream.close()
         
         # p.terminate()

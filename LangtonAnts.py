@@ -138,15 +138,26 @@ class LangtonAnts():
         self.reproduction_max_distance = 10
             
     def createAnt(self, i, x = -1, y = -1):
+        # Assign position (if passed) or set a random position in the grid
         if(x != -1 and y != -1): tmp_position = [y, x]
         else: tmp_position = [np.random.randint(0, self.height, 1)[0], np.random.randint(0, self.width, 1)[0]]
+        
+        # Assign random color
         tmp_color = (np.random.random(1)[0], np.random.random(1)[0], np.random.random(1)[0])
+        
+        # Assign random direction
         tmp_direction = np.random.randint(0, 4, 1)[0]
         
+        # Create ant
         tmp_ant = {'id':i, 'position':tmp_position, 'color':tmp_color, 'direction':tmp_direction}
-        print(i)
         
         return tmp_ant
+    
+    def setColor(self, list_of_colors):
+        if(len(self.list_of_ants) != len(list_of_colors)): raise ValueError('Length of list of ants and list of colors are different.')
+        
+        for ant, color in zip(self.list_of_ants, self.list_of_colors):
+            ant['color'] = color
         
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Update functions
