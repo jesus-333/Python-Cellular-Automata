@@ -6,13 +6,13 @@ from AutomataMusic import AntsMusicV1, AntsMusicV2
 
 #%%
 
-width = 108
-height = 108
+width = 1600
+height = 900
 
-n_ants = 2
+n_ants = 33
 
-# n_step = 30000
-n_step = 0
+n_step = 1000
+# n_step = 0
 
 reproduction = False
 
