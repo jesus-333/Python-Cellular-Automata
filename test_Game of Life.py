@@ -1,7 +1,7 @@
 import cv2 as cv2
 import numpy as np
 
-from cellularAutomataV1 import GameOfLife
+from library.game_of_life import GameOfLife
 
 #%%
 

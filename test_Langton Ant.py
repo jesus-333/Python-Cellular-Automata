@@ -1,8 +1,8 @@
 import cv2 as cv2
 import numpy as np
 
-from LangtonAnts import LangtonAnts
-from AutomataMusic import AntsMusicV1, AntsMusicV2
+from library.langton_ant import LangtonAnts
+# from AutomataMusic import AntsMusicV1, AntsMusicV2
 
 #%%
 
